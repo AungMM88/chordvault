@@ -288,6 +288,21 @@ E|---------------------------------|`
     return transposeChord(baseKey, transposeOffset);
   }, [activeSong, transposeOffset]);
 
+  // Admin Login with password prompt (default password is '1234')
+  const handleAdminToggle = () => {
+    if (isAdminMode) {
+      setIsAdminMode(false);
+      setIsEditing(false);
+    } else {
+      const password = prompt("Enter Admin Password:");
+      if (password === "1234") {
+        setIsAdminMode(true);
+      } else if (password !== null) {
+        alert("Incorrect password!");
+      }
+    }
+  };
+
   const handleStartEdit = (song) => {
     setEditForm({ 
       title: song.title, 
@@ -610,7 +625,7 @@ E|---------------------------------|`
               )}
 
               <button 
-                onClick={() => setIsAdminMode(!isAdminMode)} 
+                onClick={handleAdminToggle} 
                 style={{ padding: '6px 12px', background: isAdminMode ? '#e74c3c' : '#34495e', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
               >
                 {isAdminMode ? '🔓 Admin (ON)' : '🔒 Admin Login'}
