@@ -1,3 +1,4 @@
+import { supabase } from './supabaseClient';
 import { useState, useEffect, useMemo } from 'react'
 import './App.css'
 
@@ -251,40 +252,22 @@ E|---------------------------------|`
   });
 
   useEffect(() => {
-    localStorage.setItem('chordvault_songs', JSON.stringify(songs));
-  }, [songs]);
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSongId, setSelectedSongId] = useState(null);
-  const [activeTab, setActiveTab] = useState('lyrics');
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  
-  const [fontSize, setFontSize] = useState(16);
-  const [transposeOffset, setTransposeOffset] = useState(0);
-  const [isAutoScrolling, setIsAutoScrolling] = useState(false);
-  const [scrollSpeed, setScrollSpeed] = useState(30);
-
-  const [isAdminMode, setIsAdminMode] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ title: '', singer: '', songKey: '', lyrics: '', tabNotes: '' });
-  const [selectedString, setSelectedString] = useState('e');
-  const [barInterval, setBarInterval] = useState(16);
-
-  const stringNames = ['e', 'B', 'G', 'D', 'A', 'E'];
-  const fretsGrid = Array.from({ length: 28 }, (_, i) => i);
-
-  useEffect(() => {
-    if (!isAutoScrolling) return;
-    const scrollIntervalTimer = setInterval(() => {
-      window.scrollBy({ top: 1, behavior: 'smooth' });
-    }, scrollSpeed);
-    return () => clearInterval(scrollIntervalTimer);
-  }, [isAutoScrolling, scrollSpeed]);
-
-  useEffect(() => {
-    setTransposeOffset(0);
-    setIsAutoScrolling(false);
-  }, [selectedSongId]);
+    async function fetchCloudSongs() {
+      const { data, error } = await supabase.from('songs').select('*');
+      if (data && data.length > 0) {
+        // Map database columns back to your app state format
+        setSongs(data.map(s => ({
+          id: s.id,
+          title: s.title,
+          singer: s.singer,
+          songKey: s.song_key,
+          lyrics: s.lyrics,
+          tabNotes: s.tab_notes
+        })));
+      }
+    }
+    fetchCloudSongs();
+  }, []);
 
   const theme = {
     bg: isDarkMode ? '#121212' : '#f8f9fa',
