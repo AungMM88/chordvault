@@ -146,21 +146,21 @@ function ChordSheet({ text, fontSize }) {
         </div>
       )}
 
-      <div style={{ fontFamily: 'monospace', fontSize: `${fontSize}px`, paddingTop: '10px' }}>
+      <div style={{ fontFamily: 'monospace', fontSize: `${fontSize}px`, paddingTop: '5px' }}>
         {lines.map((line, lineIdx) => {
           const trimmed = line.trim();
           const isHeader = trimmed.startsWith('[') && trimmed.endsWith(']') && !trimmed.includes(' ') && !trimmed.includes('/');
           
           if (isHeader) {
             return (
-              <div key={lineIdx} style={{ margin: '22px 0 10px 0', fontWeight: 'bold', color: '#3498db', fontSize: `${fontSize + 2}px`, borderBottom: '1px solid #34495e', paddingBottom: '4px' }}>
+              <div key={lineIdx} style={{ margin: '24px 0 10px 0', fontWeight: 'bold', color: '#3498db', fontSize: `${fontSize + 2}px`, borderBottom: '1px solid #34495e', paddingBottom: '4px' }}>
                 {trimmed}
               </div>
             );
           }
 
           if (!line) {
-            return <div key={lineIdx} style={{ height: '16px' }}></div>;
+            return <div key={lineIdx} style={{ height: '20px' }}></div>;
           }
 
           const parts = line.split(/(\[[^\]]+\])/g);
@@ -177,24 +177,21 @@ function ChordSheet({ text, fontSize }) {
           }
 
           return (
-            <div key={lineIdx} style={{ marginBottom: '18px', lineHeight: '2.4', wordBreak: 'break-word', display: 'flex', flexWrap: 'wrap' }}>
+            <div key={lineIdx} style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '16px', alignItems: 'flex-end' }}>
               {chunks.map((chunk, cIdx) => (
-                <span key={cIdx} style={{ display: 'inline-block', position: 'relative', marginRight: '10px', verticalAlign: 'bottom' }}>
-                  {chunk.chord && (
-                    <span style={{ 
-                      position: 'absolute', 
-                      top: '-22px', 
-                      left: '0', 
-                      color: '#e74c3c', 
-                      fontSize: `${fontSize - 2}px`, 
-                      fontWeight: 'bold', 
-                      whiteSpace: 'nowrap',
-                      pointerEvents: 'none'
-                    }}>
-                      {chunk.chord}
-                    </span>
-                  )}
-                  <span>{chunk.text}</span>
+                <span key={cIdx} style={{ display: 'inline-flex', flexDirection: 'column', marginRight: '8px' }}>
+                  <span style={{ 
+                    color: '#e74c3c', 
+                    fontSize: `${fontSize - 2}px`, 
+                    fontWeight: 'bold', 
+                    minHeight: '22px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {chunk.chord || ''}
+                  </span>
+                  <span style={{ whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>{chunk.text}</span>
                 </span>
               ))}
             </div>
