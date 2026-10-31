@@ -59,13 +59,11 @@ const CHORD_DATABASE = {
 function ChordDiagram({ chordName }) {
   const normalized = chordName.trim();
   
-  // Smart lookup: handle slash chords (e.g. Amaj7/Bmaj7 -> Amaj7, D/E -> D)
   let chordData = CHORD_DATABASE[normalized];
   if (!chordData && normalized.includes('/')) {
     const rootPart = normalized.split('/')[0].trim();
     chordData = CHORD_DATABASE[rootPart];
   }
-  // Fallback default shape if chord not found
   if (!chordData) {
     chordData = { frets: [-1, 0, 2, 2, 2, 0], baseFret: 1 };
   }
@@ -148,11 +146,12 @@ function ChordSheet({ text, fontSize }) {
     if (!matches) return [];
     const unique = [...new Set(matches.map(m => m.slice(1, -1)))];
     
-    // Filter out section headers so they don't appear as chord diagrams
-    const sectionKeywords = ['verse', 'chorus', 'pre-chorus', 'bridge', 'solo', 'outro', 'intro'];
+    // Strict filter: only keep strings that start with a valid musical root note (A-G)
     return unique.filter(chord => {
-      const lower = chord.toLowerCase();
-      return !sectionKeywords.some(sec => lower.includes(sec));
+      const trimmed = chord.trim();
+      // Must start with A, B, C, D, E, F, or G (case-insensitive)
+      const isMusicalChord = /^[A-Ga-g]/.test(trimmed);
+      return isMusicalChord;
     });
   }, [text]);
 
