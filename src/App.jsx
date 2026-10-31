@@ -46,14 +46,29 @@ const CHORD_DATABASE = {
   'Am': { frets: [-1, 0, 2, 2, 1, 0], baseFret: 1 },
   'B': { frets: [-1, 2, 4, 4, 4, 2], baseFret: 2 },
   'Bm': { frets: [-1, 2, 4, 4, 3, 2], baseFret: 2 },
+  'A7': { frets: [-1, 0, 2, 0, 2, 0], baseFret: 1 },
   'A7sus4': { frets: [-1, 0, 2, 0, 3, 0], baseFret: 1 },
   'D7': { frets: [-1, -1, 0, 2, 1, 2], baseFret: 1 },
   'G7': { frets: [3, 2, 0, 0, 0, 1], baseFret: 1 },
+  'Gbm': { frets: [2, 4, 4, 2, 2, 2], baseFret: 2 },
+  'Abm': { frets: [4, 6, 6, 4, 4, 4], baseFret: 4 },
+  'Amaj7': { frets: [-1, 0, 2, 1, 2, 0], baseFret: 1 },
+  'Bmaj7': { frets: [-1, 2, 4, 3, 4, 2], baseFret: 2 },
 };
 
 function ChordDiagram({ chordName }) {
   const normalized = chordName.trim();
-  const chordData = CHORD_DATABASE[normalized] || { frets: [-1, 0, 0, 0, 0, 0], baseFret: 1 };
+  
+  // Smart lookup: handle slash chords (e.g. Amaj7/Bmaj7 -> Amaj7, D/E -> D)
+  let chordData = CHORD_DATABASE[normalized];
+  if (!chordData && normalized.includes('/')) {
+    const rootPart = normalized.split('/')[0].trim();
+    chordData = CHORD_DATABASE[rootPart];
+  }
+  // Fallback default shape if chord not found
+  if (!chordData) {
+    chordData = { frets: [-1, 0, 2, 2, 2, 0], baseFret: 1 };
+  }
   
   const width = 60;
   const height = 70;
@@ -132,7 +147,13 @@ function ChordSheet({ text, fontSize }) {
     const matches = text.match(/\[([^\]]+)\]/g);
     if (!matches) return [];
     const unique = [...new Set(matches.map(m => m.slice(1, -1)))];
-    return unique;
+    
+    // Filter out section headers so they don't appear as chord diagrams
+    const sectionKeywords = ['verse', 'chorus', 'pre-chorus', 'bridge', 'solo', 'outro', 'intro'];
+    return unique.filter(chord => {
+      const lower = chord.toLowerCase();
+      return !sectionKeywords.some(sec => lower.includes(sec));
+    });
   }, [text]);
 
   return (
@@ -691,7 +712,7 @@ E|---------------------------------|`
                   <label style={{ fontSize: '13px', fontWeight: 'bold' }}>Lyrics & Chords (with Sections):</label>
                   <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '12px', color: theme.textMuted, alignSelf: 'center' }}>Insert Section:</span>
-                    {['Verse 1', 'Chorus', 'Pre-Chorus', 'Bridge', 'Solo', 'Outro'].map(sec => (
+                    {['Intro', 'Verse 1', 'Chorus', 'Pre-Chorus', 'Bridge', 'Solo', 'Outro'].map(sec => (
                       <button key={sec} type="button" onClick={() => insertSectionTag(sec)} style={{ padding: '3px 8px', fontSize: '11px', background: '#3498db', border: 'none', color: '#fff', borderRadius: '3px', cursor: 'pointer' }}>
                         +{sec}
                       </button>
