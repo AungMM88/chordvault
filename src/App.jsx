@@ -146,39 +146,57 @@ function ChordSheet({ text, fontSize }) {
         </div>
       )}
 
-      <div style={{ fontFamily: 'monospace', fontSize: `${fontSize}px`, lineHeight: '2.0' }}>
+      <div style={{ fontFamily: 'monospace', fontSize: `${fontSize}px`, paddingTop: '10px' }}>
         {lines.map((line, lineIdx) => {
-          const isHeader = line.trim().startsWith('[') && line.trim().endsWith(']') && !line.includes(' ');
+          const trimmed = line.trim();
+          const isHeader = trimmed.startsWith('[') && trimmed.endsWith(']') && !trimmed.includes(' ') && !trimmed.includes('/');
           
           if (isHeader) {
             return (
-              <div key={lineIdx} style={{ margin: '18px 0 8px 0', fontWeight: 'bold', color: '#3498db', fontSize: `${fontSize + 1}px`, borderBottom: '1px solid #34495e', paddingBottom: '4px' }}>
-                {line.trim()}
+              <div key={lineIdx} style={{ margin: '22px 0 10px 0', fontWeight: 'bold', color: '#3498db', fontSize: `${fontSize + 2}px`, borderBottom: '1px solid #34495e', paddingBottom: '4px' }}>
+                {trimmed}
               </div>
             );
           }
 
+          if (!line) {
+            return <div key={lineIdx} style={{ height: '16px' }}></div>;
+          }
+
           const parts = line.split(/(\[[^\]]+\])/g);
+          let chunks = [];
+          
+          if (parts[0]) {
+            chunks.push({ chord: null, text: parts[0] });
+          }
+
+          for (let i = 1; i < parts.length; i += 2) {
+            const chord = parts[i] ? parts[i].slice(1, -1) : null;
+            const textChunk = parts[i + 1] || '';
+            chunks.push({ chord, text: textChunk });
+          }
+
           return (
-            <div key={lineIdx} style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '10px', minHeight: '28px' }}>
-              {parts.map((part, partIdx) => {
-                if (part.startsWith('[') && part.endsWith(']')) {
-                  const chord = part.slice(1, -1);
-                  return (
-                    <span key={partIdx} style={{ display: 'inline-flex', flexDirection: 'column', position: 'relative', marginRight: '6px' }}>
-                      <strong style={{ color: '#e74c3c', fontSize: `${fontSize - 2}px`, height: '18px', fontWeight: 'bold' }}>{chord}</strong>
+            <div key={lineIdx} style={{ marginBottom: '18px', lineHeight: '2.4', wordBreak: 'break-word', display: 'flex', flexWrap: 'wrap' }}>
+              {chunks.map((chunk, cIdx) => (
+                <span key={cIdx} style={{ display: 'inline-block', position: 'relative', marginRight: '10px', verticalAlign: 'bottom' }}>
+                  {chunk.chord && (
+                    <span style={{ 
+                      position: 'absolute', 
+                      top: '-22px', 
+                      left: '0', 
+                      color: '#e74c3c', 
+                      fontSize: `${fontSize - 2}px`, 
+                      fontWeight: 'bold', 
+                      whiteSpace: 'nowrap',
+                      pointerEvents: 'none'
+                    }}>
+                      {chunk.chord}
                     </span>
-                  );
-                } else if (part) {
-                  return (
-                    <span key={partIdx} style={{ display: 'inline-flex', flexDirection: 'column' }}>
-                      <span style={{ height: '18px' }}></span>
-                      <span>{part}</span>
-                    </span>
-                  );
-                }
-                return null;
-              })}
+                  )}
+                  <span>{chunk.text}</span>
+                </span>
+              ))}
             </div>
           );
         })}
@@ -288,7 +306,6 @@ E|---------------------------------|`
     return transposeChord(baseKey, transposeOffset);
   }, [activeSong, transposeOffset]);
 
-  // Admin Login with password prompt (default password is '1234')
   const handleAdminToggle = () => {
     if (isAdminMode) {
       setIsAdminMode(false);
